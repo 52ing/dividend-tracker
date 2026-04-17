@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주수 채우기 · By_SeUL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #17171e;
+    --surface2: #1e1e28;
+    --border: #2a2a38;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --accent: #7c6df0;
+    --green: #56e39f;
+    --amber: #f9c74f;
+    --kr: #7c6df0;
+    --us: #4ecdc4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 80px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,109,240,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,109,240,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* 헤더 */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header-left {}
+
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .byseul {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  .byseul span { color: var(--accent); }
+
+  /* 요약 카드 */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .s-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .s-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .s-value.amber { color: var(--amber); }
+  .s-value.green { color: var(--green); }
+
+  /* 섹션 */
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  .tag-kr { background: rgba(124,109,240,0.15); color: var(--kr); border: 1px solid rgba(124,109,240,0.3); }
+  .tag-us { background: rgba(78,205,196,0.12); color: var(--us); border: 1px solid rgba(78,205,196,0.25); }
+
+  /* ETF 카드 */
+  .etf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .etf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .etf-card:hover { border-color: #3a3a50; }
+
+  /* 카드 상단 */
+  .etf-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .etf-color-bar {
+    width: 4px;
+    height: 36px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+
+  .etf-info { flex: 1; min-width: 0; }
+
+  .etf-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .etf-meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .etf-target {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .etf-target .t-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .etf-target .t-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  /* 프로그레스 */
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .fill-kr   { background: linear-gradient(90deg, #5a4dd4, #7c6df0); }
+  .fill-us   { background: linear-gradient(90deg, #38b5ac, #4ecdc4); }
+  .fill-done { background: linear-gradient(90deg, #3db87a, #56e39f); }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .p-pct { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .p-remain { color: var(--muted); }
+  .p-done { color: var(--green); font-weight: 500; }
+
+  /* 입력 행 */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .input-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .btn-adj {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    user-select: none;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .btn-adj:hover { background: var(--border); }
+  .btn-adj:active { transform: scale(0.93); }
+
+  .share-input {
+    width: 72px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    padding: 6px 8px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+    flex-shrink: 0;
+  }
+
+  .share-input::-webkit-inner-spin-button,
+  .share-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .share-input:focus { border-color: var(--accent); }
+
+  .dividend-info {
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.6;
+    flex-shrink: 0;
+  }
+
+  .dividend-info .cycle {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dividend-info .div-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--amber);
+  }
+
+  /* 결과 박스 */
+  .result-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px 20px;
+    margin-bottom: 24px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-row:last-child { border-bottom: none; }
+  .result-row .r-label { color: var(--muted); }
+  .result-row .r-val { font-family: 'DM Mono', monospace; font-weight: 500; }
+
+  .result-row.highlight .r-label { color: var(--text); font-weight: 600; }
+  .result-row.highlight .r-val { color: var(--green); font-size: 20px; }
+
+  .goal-chip {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-left: 10px;
+  }
+
+  .chip-ok { background: rgba(86,227,159,0.12); color: var(--green); border: 1px solid rgba(86,227,159,0.25); }
+  .chip-ng { background: rgba(249,199,79,0.12); color: var(--amber); border: 1px solid rgba(249,199,79,0.25); }
+
+  .eval-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
+
+  .eval-label {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .eval-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  .eval-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* 저장 */
+  .btn-save {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .btn-save:hover { opacity: 0.87; }
+  .btn-save:active { transform: scale(0.98); }
+
+  .save-info {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* 푸터 */
+  footer {
+    margin-top: 48px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--border);
+    letter-spacing: 1px;
+  }
+
+  footer span { color: var(--accent); }
+
+  /* 토스트 */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--green);
+    color: #0f0f13;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 99px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 500px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 21px; }
+    .etf-target .t-num { font-size: 18px; }
+    .eval-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <header>
+    <div class="header-left">
+      <div class="header-label">dividend tracker</div>
+      <h1>주수 <span>채우기</span> 프로젝트</h1>
+      <p class="subtitle">목표 주수까지 얼마나 왔는지 추적합니다</p>
+    </div>
+    <div class="byseul">by <span>SeUL</span></div>
+  </header>
+
+  <!-- 요약 -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="s-label">전체 달성률</div>
+      <div class="s-value amber" id="total-pct">0%</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">총 평가금액</div>
+      <div class="s-value" id="total-eval">0원</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">분기 배당 (세후)</div>
+      <div class="s-value green" id="total-quarterly">0원</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">목표까지 남은 금액</div>
+      <div class="s-value" id="total-remain">-</div>
+    </div>
+  </div>
+
+  <!-- 한국 ETF -->
+  <div class="section-title"><span class="tag tag-kr">KR</span> 한국 ETF</div>
+  <div class="etf-list" id="kr-list"></div>
+
+  <!-- 미국 ETF -->
+  <div class="section-title"><span class="tag tag-us">US</span> 미국 ETF</div>
+  <div class="etf-list" id="us-list"></div>
+
+  <!-- 배당 요약 -->
+  <div class="section-title">배당 요약</div>
+  <div class="result-box">
+    <div class="result-row">
+      <span class="r-label">총 투자금액 (평가)</span>
+      <span class="r-val" id="sum-eval">0원</span>
+    </div>
+    <div class="result-row">
+      <span class="r-label">연 배당 (세전)</span>
+      <span class="r-val" id="sum-before">0원</span>
+    </div>
+    <div class="result-row">
+      <span class="r-label">연 배당 (세후 15.4%)</span>
+      <span class="r-val" id="sum-after">0원</span>
+    </div>
+    <div class="result-row highlight">
+      <span class="r-label">분기 평균 (세후)</span>
+      <div style="display:flex;align-items:center;">
+        <span class="r-val" id="sum-quarterly">0원</span>
+        <span class="goal-chip chip-ng" id="goal-chip">목표까지 200,000원 부족</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-save" onclick="saveData()">💾 현재 주수 저장</button>
+  <p class="save-info" id="last-saved">마지막 저장: 없음</p>
+
+  <footer>
+    <br><br>
+    dividend tracker · made <span>By_SeUL</span> · 2026
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const ETF_LIST = [
+    {
+      id: 'tiger', type: 'kr',
+      name: 'TIGER 코리아배당다우존스',
+      price: 15895, target: 180,
+      annualDiv: 660,
+      cycle: '월배당 · 15일',
+      color: '#7c6df0'
+    },
+    {
+      id: 'sol', type: 'kr',
+      name: 'SOL 코리아고배당',
+      price: 13190, target: 290,
+      annualDiv: 790,
+      cycle: '월배당 · 중순',
+      color: '#1D9E75'
+    },
+    {
+      id: 'kodex', type: 'kr',
+      name: 'KODEX 코리아배당성장',
+      price: 27775, target: 100,
+      annualDiv: 1100,
+      cycle: '월배당 · 말일',
+      color: '#D85A30'
+    },
+    {
+      id: 'schd', type: 'us',
+      name: 'SCHD',
+      price: 45484,   // $30.65 × 1,484
+      target: 80,
+      annualDiv: 1573, // $1.06 × 1,484
+      cycle: '분기배당 · 3·6·9·12월',
+      color: '#185FA5'
+    },
+    {
+      id: 'dgro', type: 'us',
+      name: 'DGRO',
+      price: 107382,  // $72.36 × 1,484
+      target: 25,
+      annualDiv: 2197, // $1.48 × 1,484
+      cycle: '분기배당 · 3·6·9·12월',
+      color: '#BA7517'
+    },
+    {
+      id: 'jepq', type: 'us',
+      name: 'JEPQ',
+      price: 86784,   // $58.48 × 1,484
+      target: 45,
+      annualDiv: 9175, // $6.18 × 1,484
+      cycle: '월배당',
+      color: '#D4537E'
+    },
+  ];
+
+  const GOAL = 200000;
+  let holdings = JSON.parse(localStorage.getItem('seul_holdings') || '{}');
+
+  function held(id) { return parseInt(holdings[id] || 0); }
+
+  // ── 렌더 ──────────────────────────────────────
+  function render() {
+    ['kr','us'].forEach(type => {
+      const el = document.getElementById(type + '-list');
+      el.innerHTML = '';
+      ETF_LIST.filter(e => e.type === type).forEach(etf => {
+        el.appendChild(makeCard(etf));
+      });
+    });
+    refreshSummary();
+  }
+
+  function makeCard(etf) {
+    const h = held(etf.id);
+    const remain = Math.max(0, etf.target - h);
+    const pct = Math.min(100, Math.round(h / etf.target * 100));
+    const done = h >= etf.target;
+    const qDiv = Math.round(h * etf.annualDiv * 0.846 / 4);
+    const fillClass = done ? 'fill-done' : (etf.type === 'kr' ? 'fill-kr' : 'fill-us');
+
+    const div = document.createElement('div');
+    div.className = 'etf-card';
+    div.innerHTML = `
+      <div class="etf-top">
+        <div class="etf-color-bar" style="background:${etf.color}"></div>
+        <div class="etf-info">
+          <div class="etf-name">${etf.name}</div>
+          <div class="etf-meta">${etf.price.toLocaleString()}원/주 · ${etf.cycle}</div>
+        </div>
+        <div class="etf-target">
+          <div class="t-num">${etf.target}주</div>
+          <div class="t-label">목표</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill ${fillClass}" id="bar-${etf.id}" style="width:${pct}%"></div>
+      </div>
+
+      <div class="progress-row">
+        <span class="p-pct" id="pct-${etf.id}"
+          style="color:${done ? 'var(--green)' : etf.color}">${pct}%</span>
+        <span class="${done ? 'p-done' : 'p-remain'}" id="remain-${etf.id}">
+          ${done ? '✅ 목표 달성!' : `${remain}주 남음 · 약 ${Math.round(remain * etf.price / 10000)}만원`}
+        </span>
+      </div>
+
+      <div class="eval-row">
+        <span class="eval-label">평가금액</span>
+        <span class="eval-val" id="eval-${etf.id}">${(h * etf.price).toLocaleString()}원</span>
+        <span class="eval-sub">(${h}주 × ${etf.price.toLocaleString()}원)</span>
+      </div>
+
+      <div class="input-row">
+        <span class="input-label">보유 주수</span>
+        <button class="btn-adj" onclick="adj('${etf.id}', -10)">−10</button>
+        <button class="btn-adj" onclick="adj('${etf.id}', -1)">−</button>
+        <input class="share-input" type="number" id="inp-${etf.id}"
+               value="${h}" min="0"
+               oninput="onInp('${etf.id}', this.value)" />
+        <button class="btn-adj" onclick="adj('${etf.id}', 1)">＋</button>
+        <button class="btn-adj" onclick="adj('${etf.id}', 10)">＋10</button>
+        <div class="dividend-info">
+          <div class="cycle">${etf.cycle}</div>
+          <div class="div-val" id="div-${etf.id}">분기 ${qDiv.toLocaleString()}원</div>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  // ── 입력 핸들러 ───────────────────────────────
+  function onInp(id, val) {
+    holdings[id] = Math.max(0, parseInt(val) || 0);
+    updateCard(id);
+    refreshSummary();
+  }
+
+  function adj(id, delta) {
+    holdings[id] = Math.max(0, held(id) + delta);
+    const inp = document.getElementById('inp-' + id);
+    if (inp) inp.value = holdings[id];
+    updateCard(id);
+    refreshSummary();
+  }
+
+  function updateCard(id) {
+    const etf = ETF_LIST.find(e => e.id === id);
+    const h = held(id);
+    const remain = Math.max(0, etf.target - h);
+    const pct = Math.min(100, Math.round(h / etf.target * 100));
+    const done = h >= etf.target;
+    const qDiv = Math.round(h * etf.annualDiv * 0.846 / 4);
+
+    const bar = document.getElementById('bar-' + id);
+    const pctEl = document.getElementById('pct-' + id);
+    const remEl = document.getElementById('remain-' + id);
+    const divEl = document.getElementById('div-' + id);
+
+    if (bar) {
+      bar.style.width = pct + '%';
+      bar.className = 'progress-fill ' + (done ? 'fill-done' : (etf.type === 'kr' ? 'fill-kr' : 'fill-us'));
+    }
+    if (pctEl) {
+      pctEl.textContent = pct + '%';
+      pctEl.style.color = done ? 'var(--green)' : etf.color;
+    }
+    if (remEl) {
+      remEl.textContent = done
+        ? '✅ 목표 달성!'
+        : `${remain}주 남음 · 약 ${Math.round(remain * etf.price / 10000)}만원`;
+      remEl.className = done ? 'p-done' : 'p-remain';
+    }
+    const evalEl = document.getElementById('eval-' + id);
+    if (evalEl) {
+      evalEl.textContent = (h * etf.price).toLocaleString() + '원';
+      evalEl.nextElementSibling.textContent = `(${h}주 × ${etf.price.toLocaleString()}원)`;
+    }
+    if (divEl) divEl.textContent = `분기 ${qDiv.toLocaleString()}원`;
+  }
+
+  // ── 전체 요약 ────────────────────────────────
+  function refreshSummary() {
+    let totalH = 0, totalT = 0, annualBefore = 0, remainMoney = 0, totalEval = 0;
+
+    ETF_LIST.forEach(etf => {
+      const h = held(etf.id);
+      totalH += h;
+      totalT += etf.target;
+      annualBefore += h * etf.annualDiv;
+      remainMoney += Math.max(0, etf.target - h) * etf.price;
+      totalEval += h * etf.price;
+    });
+
+    const pct = Math.round(totalH / totalT * 100);
+    const annualAfter = Math.round(annualBefore * 0.846);
+    const quarterly = Math.round(annualAfter / 4);
+
+    document.getElementById('total-pct').textContent = pct + '%';
+    document.getElementById('total-eval').textContent = totalEval > 0 ? '약 ' + Math.round(totalEval / 10000).toLocaleString() + '만원' : '-';
+    document.getElementById('total-quarterly').textContent = quarterly.toLocaleString() + '원';
+    document.getElementById('total-remain').textContent =
+      remainMoney > 0 ? '약 ' + Math.round(remainMoney / 10000).toLocaleString() + '만원' : '완료 🎉';
+
+    document.getElementById('sum-eval').textContent = totalEval > 0 ? totalEval.toLocaleString() + '원' : '0원';
+    document.getElementById('sum-before').textContent = Math.round(annualBefore).toLocaleString() + '원';
+    document.getElementById('sum-after').textContent = annualAfter.toLocaleString() + '원';
+    document.getElementById('sum-quarterly').textContent = quarterly.toLocaleString() + '원';
+
+    const chip = document.getElementById('goal-chip');
+    if (quarterly >= GOAL) {
+      chip.className = 'goal-chip chip-ok';
+      chip.textContent = '🎯 목표 달성!';
+    } else {
+      chip.className = 'goal-chip chip-ng';
+      chip.textContent = (GOAL - quarterly).toLocaleString() + '원 부족';
+    }
+  }
+
+  // ── 저장 ────────────────────────────────────
+  function saveData() {
+    localStorage.setItem('seul_holdings', JSON.stringify(holdings));
+    const now = new Date();
+    const ts = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    localStorage.setItem('seul_saved_at', ts);
+    document.getElementById('last-saved').textContent = '마지막 저장: ' + ts;
+    toast('💾 저장 완료!');
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  // ── 초기화 ───────────────────────────────────
+  const savedAt = localStorage.getItem('seul_saved_at');
+  if (savedAt) document.getElementById('last-saved').textContent = '마지막 저장: ' + savedAt;
+
+  render();
+</script>
+</body>
+</html>
