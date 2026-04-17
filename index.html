@@ -1,3 +1,10 @@
+
+1Password 메뉴를 사용할 수 있습니다. 아래쪽 화살표를 눌러서 선택하세요.
+indexv1.html
+21.12 KB•782줄
+•
+원본과 형식이 일치하지 않을 수 있습니다
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -102,7 +109,7 @@
   /* 요약 카드 */
   .summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 36px;
   }
@@ -365,6 +372,33 @@
   .chip-ok { background: rgba(86,227,159,0.12); color: var(--green); border: 1px solid rgba(86,227,159,0.25); }
   .chip-ng { background: rgba(249,199,79,0.12); color: var(--amber); border: 1px solid rgba(249,199,79,0.25); }
 
+  .eval-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
+
+  .eval-label {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .eval-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  .eval-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
   /* 저장 */
   .btn-save {
     width: 100%;
@@ -427,6 +461,7 @@
     .summary-grid { grid-template-columns: 1fr 1fr; }
     h1 { font-size: 21px; }
     .etf-target .t-num { font-size: 18px; }
+    .eval-sub { display: none; }
   }
 </style>
 </head>
@@ -450,6 +485,10 @@
       <div class="s-value amber" id="total-pct">0%</div>
     </div>
     <div class="summary-card">
+      <div class="s-label">총 평가금액</div>
+      <div class="s-value" id="total-eval">0원</div>
+    </div>
+    <div class="summary-card">
       <div class="s-label">분기 배당 (세후)</div>
       <div class="s-value green" id="total-quarterly">0원</div>
     </div>
@@ -470,6 +509,10 @@
   <!-- 배당 요약 -->
   <div class="section-title">배당 요약</div>
   <div class="result-box">
+    <div class="result-row">
+      <span class="r-label">총 투자금액 (평가)</span>
+      <span class="r-val" id="sum-eval">0원</span>
+    </div>
     <div class="result-row">
       <span class="r-label">연 배당 (세전)</span>
       <span class="r-val" id="sum-before">0원</span>
@@ -606,6 +649,12 @@
         </span>
       </div>
 
+      <div class="eval-row">
+        <span class="eval-label">평가금액</span>
+        <span class="eval-val" id="eval-${etf.id}">${(h * etf.price).toLocaleString()}원</span>
+        <span class="eval-sub">(${h}주 × ${etf.price.toLocaleString()}원)</span>
+      </div>
+
       <div class="input-row">
         <span class="input-label">보유 주수</span>
         <button class="btn-adj" onclick="adj('${etf.id}', -10)">−10</button>
@@ -666,12 +715,17 @@
         : `${remain}주 남음 · 약 ${Math.round(remain * etf.price / 10000)}만원`;
       remEl.className = done ? 'p-done' : 'p-remain';
     }
+    const evalEl = document.getElementById('eval-' + id);
+    if (evalEl) {
+      evalEl.textContent = (h * etf.price).toLocaleString() + '원';
+      evalEl.nextElementSibling.textContent = `(${h}주 × ${etf.price.toLocaleString()}원)`;
+    }
     if (divEl) divEl.textContent = `분기 ${qDiv.toLocaleString()}원`;
   }
 
   // ── 전체 요약 ────────────────────────────────
   function refreshSummary() {
-    let totalH = 0, totalT = 0, annualBefore = 0, remainMoney = 0;
+    let totalH = 0, totalT = 0, annualBefore = 0, remainMoney = 0, totalEval = 0;
 
     ETF_LIST.forEach(etf => {
       const h = held(etf.id);
@@ -679,6 +733,7 @@
       totalT += etf.target;
       annualBefore += h * etf.annualDiv;
       remainMoney += Math.max(0, etf.target - h) * etf.price;
+      totalEval += h * etf.price;
     });
 
     const pct = Math.round(totalH / totalT * 100);
@@ -686,10 +741,12 @@
     const quarterly = Math.round(annualAfter / 4);
 
     document.getElementById('total-pct').textContent = pct + '%';
+    document.getElementById('total-eval').textContent = totalEval > 0 ? '약 ' + Math.round(totalEval / 10000).toLocaleString() + '만원' : '-';
     document.getElementById('total-quarterly').textContent = quarterly.toLocaleString() + '원';
     document.getElementById('total-remain').textContent =
       remainMoney > 0 ? '약 ' + Math.round(remainMoney / 10000).toLocaleString() + '만원' : '완료 🎉';
 
+    document.getElementById('sum-eval').textContent = totalEval > 0 ? totalEval.toLocaleString() + '원' : '0원';
     document.getElementById('sum-before').textContent = Math.round(annualBefore).toLocaleString() + '원';
     document.getElementById('sum-after').textContent = annualAfter.toLocaleString() + '원';
     document.getElementById('sum-quarterly').textContent = quarterly.toLocaleString() + '원';
